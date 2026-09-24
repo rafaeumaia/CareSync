@@ -3,8 +3,10 @@ abstract final class AppRadius {
   /// Raio base do design system (cards, `rounded-xl`).
   static const double card = 12;
 
-  /// Botões (`rounded-md`).
-  static const double button = 8;
+  /// Botões e campos (`rounded-md`). No tema do protótipo,
+  /// `--radius-md: calc(var(--radius) - 2px)` com `--radius: 0.75rem`,
+  /// ou seja, 10px.
+  static const double button = 10;
 
   /// Avatares, badges de status, FAB (`rounded-full`).
   static const double full = 999;

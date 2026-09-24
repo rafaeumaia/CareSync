@@ -63,6 +63,9 @@ flutter:
 
   assets:
     - assets/icons/heart.svg
+    - assets/icons/heart_outline.svg
+    - assets/icons/calendar.svg
+    - assets/icons/users.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:
