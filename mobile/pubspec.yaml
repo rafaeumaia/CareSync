@@ -62,10 +62,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/icons/heart.svg
-    - assets/icons/heart_outline.svg
-    - assets/icons/calendar.svg
-    - assets/icons/users.svg
+    - assets/icons/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

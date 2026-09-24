@@ -20,12 +20,24 @@ abstract final class AppShadows {
     ),
   ];
 
-  /// Sombra mais acentuada do FAB (`shadow-lg`), para reforçar elevação.
-  static const List<BoxShadow> fab = [
+  /// `shadow-lg` do Tailwind v4: `0 10px 15px -3px rgb(0 0 0 / 0.1),
+  /// 0 4px 6px -4px rgb(0 0 0 / 0.1)`. Usada no FAB e como realce de cards
+  /// clicáveis (`hover:shadow-lg`).
+  static const List<BoxShadow> lg = [
     BoxShadow(
-      color: Color(0x26000000), // rgba(0,0,0,0.15)
+      color: Color(0x1A000000),
+      offset: Offset(0, 10),
+      blurRadius: 15,
+      spreadRadius: -3,
+    ),
+    BoxShadow(
+      color: Color(0x1A000000),
       offset: Offset(0, 4),
-      blurRadius: 12,
+      blurRadius: 6,
+      spreadRadius: -4,
     ),
   ];
+
+  /// Sombra do FAB (`shadow-lg`).
+  static const List<BoxShadow> fab = lg;
 }

@@ -6,6 +6,7 @@ import 'package:caresync/main.dart';
 import 'package:caresync/core/router/route_paths.dart';
 import 'package:caresync/features/auth/presentation/login_screen.dart';
 import 'package:caresync/features/auth/presentation/onboarding_screen.dart';
+import 'package:caresync/features/dashboard/presentation/dashboard_screen.dart';
 
 void main() {
   testWidgets('App inicia na Splash e aplica o tema do CareSync',
@@ -44,6 +45,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LoginScreen), findsOneWidget);
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'ana@exemplo.com');
+    await tester.enterText(fields.at(1), 'segredo');
+    await tester.ensureVisible(find.text('Entrar'));
+    await tester.tap(find.text('Entrar'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DashboardScreen), findsOneWidget);
+    expect(find.text('Olá, Gustavo Werneck 👋'), findsOneWidget);
   });
 
   testWidgets('RoutePaths.splash é a rota inicial esperada',

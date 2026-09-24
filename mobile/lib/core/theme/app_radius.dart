@@ -1,11 +1,16 @@
 /// Raios de borda do design system do CareSync (PROJECT_SPEC.md, seção 5.4).
+///
+/// Valores conferidos no `globals.css` do protótipo: `--radius: 0.75rem`,
+/// com `--radius-md: calc(var(--radius) - 2px)`, `--radius-lg:
+/// var(--radius)` e `--radius-xl: calc(var(--radius) + 4px)`.
 abstract final class AppRadius {
-  /// Raio base do design system (cards, `rounded-xl`).
-  static const double card = 12;
+  /// Cards (`rounded-xl` = 16px).
+  static const double card = 16;
 
-  /// Botões e campos (`rounded-md`). No tema do protótipo,
-  /// `--radius-md: calc(var(--radius) - 2px)` com `--radius: 0.75rem`,
-  /// ou seja, 10px.
+  /// Itens internos de cards, como as linhas de tarefa (`rounded-lg`).
+  static const double item = 12;
+
+  /// Botões, campos e badges (`rounded-md`), ou seja, 10px.
   static const double button = 10;
 
   /// Avatares, badges de status, FAB (`rounded-full`).
