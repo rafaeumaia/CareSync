@@ -27,6 +27,18 @@ Este arquivo define as regras fixas de como este projeto deve ser conduzido. Est
 
 - **Não inventar funcionalidades que não existam no Figma sem autorização.** Qualquer funcionalidade nova, tela nova, ou fluxo não presente no protótipo deve ser proposta e aprovada antes de ser implementada.
 
+## Melhorias sugeridas (funcionalidades ausentes no protótipo)
+
+- Sempre que, durante a análise ou implementação de uma tela, for identificada uma funcionalidade **ausente no protótipo** que seja claramente útil, importante ou esperada em um aplicativo real, ela **não deve ser implementada automaticamente**. Não inventar funcionalidades silenciosamente.
+- Primeiro, implementar a tela fiel ao Figma Make.
+- Ao final da tarefa, incluir no relatório uma seção chamada **"Melhorias sugeridas"**, que, para cada funcionalidade ausente:
+  - explica a funcionalidade ausente;
+  - explica por que ela seria útil;
+  - classifica a prioridade como **baixa**, **média** ou **alta**;
+  - descreve brevemente o impacto técnico esperado;
+  - pergunta explicitamente se o usuário quer implementá-la antes de avançar para a próxima tela.
+- Exemplos do que avaliar: ações CRUD ausentes, edição/exclusão, desfazer ações, confirmações importantes, notificações, validações, acessibilidade, persistência, tratamento de erros, estados de loading e outros recursos que façam sentido para a experiência real do usuário.
+
 ## Arquitetura Flutter
 
 - Utilizar **arquitetura organizada e feature-first** (uma pasta por feature/tela ou domínio, com separação interna de apresentação, estado, domínio e dados).

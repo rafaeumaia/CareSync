@@ -9,6 +9,8 @@ import '../theme/app_shadows.dart';
 ///
 /// Quando [onTap] é informado, o card é clicável e, enquanto pressionado,
 /// ganha a sombra `shadow-lg` (`hover:shadow-lg transition-shadow`, 150ms).
+///
+/// [color] substitui o fundo `card` (ex.: `bg-[#56CCF2]/10`).
 class AppCard extends StatefulWidget {
   const AppCard({
     super.key,
@@ -16,12 +18,14 @@ class AppCard extends StatefulWidget {
     this.padding = EdgeInsets.zero,
     this.onTap,
     this.semanticLabel,
+    this.color,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
   final String? semanticLabel;
+  final Color? color;
 
   @override
   State<AppCard> createState() => _AppCardState();
@@ -41,7 +45,7 @@ class _AppCardState extends State<AppCard> {
       curve: const Cubic(0.4, 0, 0.2, 1),
       padding: widget.padding,
       decoration: BoxDecoration(
-        color: context.careSyncColors.card,
+        color: widget.color ?? context.careSyncColors.card,
         borderRadius: BorderRadius.circular(AppRadius.card),
         boxShadow: _pressed ? AppShadows.lg : AppShadows.card,
       ),

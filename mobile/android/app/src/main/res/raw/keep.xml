@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mantém o ícone das notificações na build de release (o plugin o
+     referencia só pelo nome, então o R8 o removeria). -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_medicacao" />
