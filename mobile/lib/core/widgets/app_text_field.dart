@@ -3,28 +3,137 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
+import '../theme/app_typography.dart';
 
-/// Campo de formulário do CareSync: `Label` + `Input` do protótipo Figma
-/// Make (`ui/label.tsx` e `ui/input.tsx`), com a customização usada nos
-/// formulários das telas (`h-12 bg-input-background border-0`).
-///
-/// - Label: 14px (`text-sm`), peso 500, `leading-none`, 8px acima do campo
-///   (`space-y-2`).
-/// - Campo: 48px de altura, fundo `input-background`, sem borda, cantos
-///   `rounded-md`, 12px de padding horizontal (`px-3`), texto 16px
-///   (`text-base`, 14px a partir de 768px por `md:text-sm`), placeholder em
-///   `muted-foreground`.
-/// - Foco: anel externo de 3px em `ring` a 50% (`focus-visible:ring-[3px]
-///   ring-ring/50`), com a transição de 150ms do `transition-[box-shadow]`.
+/// Variações do `Input`/`Textarea` do protótipo Figma Make usadas nas telas.
+enum AppInputVariant {
+  /// `Input` com `h-12 bg-input-background border-0` (Login, Cadastro):
+  /// 48px de altura, sem borda.
+  large,
+
+  /// `Input` padrão (`ui/input.tsx`), usado nos formulários dos diálogos:
+  /// 36px de altura (`h-9`) e borda de 1px transparente que assume a cor
+  /// `ring` no foco (`focus-visible:border-ring`).
+  standard,
+
+  /// `Textarea` padrão (`ui/textarea.tsx`): mínimo de 64px (`min-h-16`),
+  /// padding `px-3 py-2`, cresce com o conteúdo (`field-sizing-content`) e
+  /// tem a mesma borda do [standard].
+  multiline,
+}
+
+/// Label de campo (`ui/label.tsx`): 14px (`text-sm`), peso 500,
+/// `leading-none`. Tocar nela executa [onTap] (equivalente ao `htmlFor`).
+class AppFieldLabel extends StatelessWidget {
+  const AppFieldLabel(this.text, {super.key, this.onTap});
+
+  final String text;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Text(
+        text,
+        style: AppTypography.inter(
+          size: 14,
+          lineHeight: 14,
+          weight: FontWeight.w500,
+          color: context.careSyncColors.foreground,
+        ),
+      ),
+    );
+  }
+}
+
+/// Caixa visual dos campos: fundo `input-background`, cantos `rounded-md`,
+/// padding horizontal de 12px (`px-3`) e, com foco, o anel externo de 3px
+/// em `ring` a 50% (`focus-visible:ring-[3px] ring-ring/50`), com a
+/// transição de 150ms do `transition-[color,box-shadow]`.
+class AppInputBox extends StatelessWidget {
+  const AppInputBox({
+    super.key,
+    required this.variant,
+    required this.focused,
+    required this.child,
+  });
+
+  final AppInputVariant variant;
+  final bool focused;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.careSyncColors;
+    final bordered = variant != AppInputVariant.large;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      curve: const Cubic(0.4, 0, 0.2, 1),
+      height: switch (variant) {
+        AppInputVariant.large => 48,
+        AppInputVariant.standard => 36,
+        AppInputVariant.multiline => null,
+      },
+      constraints: variant == AppInputVariant.multiline
+          ? const BoxConstraints(minHeight: 64)
+          : null,
+      padding: EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: variant == AppInputVariant.multiline ? 8 : 0,
+      ),
+      alignment: variant == AppInputVariant.multiline
+          ? Alignment.topLeft
+          : Alignment.centerLeft,
+      decoration: BoxDecoration(
+        color: colors.inputBackground,
+        borderRadius: BorderRadius.circular(AppRadius.button),
+        border: bordered
+            ? Border.all(
+                color: focused ? colors.ring : colors.ring.withValues(alpha: 0),
+              )
+            : null,
+        boxShadow: [
+          BoxShadow(
+            color: focused
+                ? colors.ring.withValues(alpha: 0.5)
+                : colors.ring.withValues(alpha: 0),
+            spreadRadius: 3,
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  /// Estilo do texto digitado: 16px (`text-base`), 14px a partir de 768px
+  /// (`md:text-sm`), altura de linha 1.5, cor `foreground`.
+  static TextStyle textStyle(BuildContext context) {
+    final isTablet =
+        MediaQuery.sizeOf(context).width >= AppSpacing.tabletBreakpoint;
+    final size = isTablet ? 14.0 : 16.0;
+    return AppTypography.inter(
+      size: size,
+      lineHeight: size * 1.5,
+      color: context.careSyncColors.foreground,
+    );
+  }
+}
+
+/// Campo de formulário do CareSync: [AppFieldLabel] + campo de texto,
+/// separados por 8px (`space-y-2`), com o placeholder em
+/// `muted-foreground`. A aparência do campo vem de [variant].
 class AppTextField extends StatefulWidget {
   const AppTextField({
     super.key,
     required this.label,
+    this.variant = AppInputVariant.large,
     this.controller,
     this.focusNode,
     this.placeholder,
     this.keyboardType,
     this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
     this.obscureText = false,
     this.autocorrect = true,
     this.enableSuggestions = true,
@@ -32,11 +141,13 @@ class AppTextField extends StatefulWidget {
   });
 
   final String label;
+  final AppInputVariant variant;
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final String? placeholder;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
   final bool obscureText;
   final bool autocorrect;
   final bool enableSuggestions;
@@ -79,56 +190,18 @@ class _AppTextFieldState extends State<AppTextField> {
   @override
   Widget build(BuildContext context) {
     final colors = context.careSyncColors;
-    final textTheme = Theme.of(context).textTheme;
-    final isTablet =
-        MediaQuery.sizeOf(context).width >= AppSpacing.tabletBreakpoint;
-    final fontSize = isTablet ? 14.0 : 16.0;
-
-    final labelStyle = textTheme.labelMedium?.copyWith(
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      height: 1,
-      letterSpacing: 0,
-      leadingDistribution: TextLeadingDistribution.even,
-      color: colors.foreground,
-    );
-    final inputStyle = textTheme.bodyLarge?.copyWith(
-      fontSize: fontSize,
-      fontWeight: FontWeight.w400,
-      height: 1.5,
-      letterSpacing: 0,
-      leadingDistribution: TextLeadingDistribution.even,
-      color: colors.foreground,
-    );
+    final inputStyle = AppInputBox.textStyle(context);
+    final multiline = widget.variant == AppInputVariant.multiline;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // O `htmlFor` do Label foca o campo ao ser tocado.
-        GestureDetector(
-          onTap: _focusNode.requestFocus,
-          child: Text(widget.label, style: labelStyle),
-        ),
+        AppFieldLabel(widget.label, onTap: _focusNode.requestFocus),
         const SizedBox(height: 8),
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          curve: const Cubic(0.4, 0, 0.2, 1),
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          alignment: Alignment.centerLeft,
-          decoration: BoxDecoration(
-            color: colors.inputBackground,
-            borderRadius: BorderRadius.circular(AppRadius.button),
-            boxShadow: [
-              BoxShadow(
-                color: _focusNode.hasFocus
-                    ? colors.ring.withValues(alpha: 0.5)
-                    : colors.ring.withValues(alpha: 0),
-                spreadRadius: 3,
-              ),
-            ],
-          ),
+        AppInputBox(
+          variant: widget.variant,
+          focused: _focusNode.hasFocus,
           child: TextSelectionTheme(
             // `selection:bg-primary`.
             data: TextSelectionThemeData(
@@ -138,8 +211,13 @@ class _AppTextFieldState extends State<AppTextField> {
             child: TextField(
               controller: widget.controller,
               focusNode: _focusNode,
-              keyboardType: widget.keyboardType,
+              keyboardType: multiline
+                  ? TextInputType.multiline
+                  : widget.keyboardType,
               textInputAction: widget.textInputAction,
+              textCapitalization: widget.textCapitalization,
+              minLines: multiline ? 1 : null,
+              maxLines: multiline ? null : 1,
               obscureText: widget.obscureText,
               obscuringCharacter: '•',
               autocorrect: widget.autocorrect,
@@ -148,8 +226,8 @@ class _AppTextFieldState extends State<AppTextField> {
               style: inputStyle,
               // O cursor do navegador usa a cor do texto (`caret-color: auto`).
               cursorColor: colors.foreground,
-              // Fundo, borda e anel de foco são desenhados pelo container
-              // acima; todas as bordas/preenchimento do
+              // Fundo, borda e anel de foco são desenhados por
+              // [AppInputBox]; todas as bordas/preenchimento do
               // `inputDecorationTheme` global são desligados aqui (o
               // `InputDecoration.collapsed` ainda herdaria o `focusedBorder`
               // do tema).
@@ -164,7 +242,7 @@ class _AppTextFieldState extends State<AppTextField> {
                 errorBorder: InputBorder.none,
                 focusedErrorBorder: InputBorder.none,
                 hintText: widget.placeholder,
-                hintStyle: inputStyle?.copyWith(color: colors.mutedForeground),
+                hintStyle: inputStyle.copyWith(color: colors.mutedForeground),
               ),
             ),
           ),

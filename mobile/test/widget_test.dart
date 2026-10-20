@@ -6,6 +6,7 @@ import 'package:caresync/main.dart';
 import 'package:caresync/core/router/route_paths.dart';
 import 'package:caresync/features/auth/presentation/login_screen.dart';
 import 'package:caresync/features/auth/presentation/onboarding_screen.dart';
+import 'package:caresync/features/consultas/presentation/consultas_screen.dart';
 import 'package:caresync/features/dashboard/presentation/dashboard_screen.dart';
 
 void main() {
@@ -55,6 +56,11 @@ void main() {
 
     expect(find.byType(DashboardScreen), findsOneWidget);
     expect(find.text('Olá, Gustavo Werneck 👋'), findsOneWidget);
+
+    await tester.tap(find.text('Agenda'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ConsultasScreen), findsOneWidget);
+    expect(find.text('Próximas'), findsOneWidget);
   });
 
   testWidgets('RoutePaths.splash é a rota inicial esperada',
