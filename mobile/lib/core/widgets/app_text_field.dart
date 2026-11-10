@@ -24,11 +24,18 @@ enum AppInputVariant {
 
 /// Label de campo (`ui/label.tsx`): 14px (`text-sm`), peso 500,
 /// `leading-none`. Tocar nela executa [onTap] (equivalente ao `htmlFor`).
+/// Com [hasError], fica em `destructive` (`FormLabel` do protótipo).
 class AppFieldLabel extends StatelessWidget {
-  const AppFieldLabel(this.text, {super.key, this.onTap});
+  const AppFieldLabel(
+    this.text, {
+    super.key,
+    this.onTap,
+    this.hasError = false,
+  });
 
   final String text;
   final VoidCallback? onTap;
+  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +47,30 @@ class AppFieldLabel extends StatelessWidget {
           size: 14,
           lineHeight: 14,
           weight: FontWeight.w500,
-          color: context.careSyncColors.foreground,
+          color: hasError
+              ? context.careSyncColors.destructive
+              : context.careSyncColors.foreground,
         ),
+      ),
+    );
+  }
+}
+
+/// Mensagem de erro de um campo (`FormMessage` do protótipo): 14px
+/// (`text-sm`) em `destructive`.
+class AppFieldError extends StatelessWidget {
+  const AppFieldError(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: AppTypography.inter(
+        size: 14,
+        lineHeight: 20,
+        color: context.careSyncColors.destructive,
       ),
     );
   }
@@ -51,22 +80,36 @@ class AppFieldLabel extends StatelessWidget {
 /// padding horizontal de 12px (`px-3`) e, com foco, o anel externo de 3px
 /// em `ring` a 50% (`focus-visible:ring-[3px] ring-ring/50`), com a
 /// transição de 150ms do `transition-[color,box-shadow]`.
+///
+/// Com [invalid] (`aria-invalid` do protótipo), a borda fica `destructive`
+/// e o anel de foco usa `destructive` a 20% (40% no tema escuro).
 class AppInputBox extends StatelessWidget {
   const AppInputBox({
     super.key,
     required this.variant,
     required this.focused,
     required this.child,
+    this.invalid = false,
   });
 
   final AppInputVariant variant;
   final bool focused;
   final Widget child;
+  final bool invalid;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.careSyncColors;
     final bordered = variant != AppInputVariant.large;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = invalid
+        ? colors.destructive
+        : focused
+        ? colors.ring
+        : colors.ring.withValues(alpha: 0);
+    final ringColor = invalid
+        ? colors.destructive.withValues(alpha: isDark ? 0.4 : 0.2)
+        : colors.ring.withValues(alpha: 0.5);
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       curve: const Cubic(0.4, 0, 0.2, 1),
@@ -88,16 +131,10 @@ class AppInputBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.inputBackground,
         borderRadius: BorderRadius.circular(AppRadius.button),
-        border: bordered
-            ? Border.all(
-                color: focused ? colors.ring : colors.ring.withValues(alpha: 0),
-              )
-            : null,
+        border: bordered ? Border.all(color: borderColor) : null,
         boxShadow: [
           BoxShadow(
-            color: focused
-                ? colors.ring.withValues(alpha: 0.5)
-                : colors.ring.withValues(alpha: 0),
+            color: focused ? ringColor : ringColor.withValues(alpha: 0),
             spreadRadius: 3,
           ),
         ],
@@ -138,6 +175,8 @@ class AppTextField extends StatefulWidget {
     this.autocorrect = true,
     this.enableSuggestions = true,
     this.onSubmitted,
+    this.onChanged,
+    this.errorText,
   });
 
   final String label;
@@ -152,6 +191,11 @@ class AppTextField extends StatefulWidget {
   final bool autocorrect;
   final bool enableSuggestions;
   final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onChanged;
+
+  /// Mensagem de erro, 8px abaixo do campo (`FormMessage`); também deixa
+  /// label e borda em `destructive`.
+  final String? errorText;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -197,11 +241,16 @@ class _AppTextFieldState extends State<AppTextField> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppFieldLabel(widget.label, onTap: _focusNode.requestFocus),
+        AppFieldLabel(
+          widget.label,
+          onTap: _focusNode.requestFocus,
+          hasError: widget.errorText != null,
+        ),
         const SizedBox(height: 8),
         AppInputBox(
           variant: widget.variant,
           focused: _focusNode.hasFocus,
+          invalid: widget.errorText != null,
           child: TextSelectionTheme(
             // `selection:bg-primary`.
             data: TextSelectionThemeData(
@@ -223,6 +272,7 @@ class _AppTextFieldState extends State<AppTextField> {
               autocorrect: widget.autocorrect,
               enableSuggestions: widget.enableSuggestions,
               onSubmitted: widget.onSubmitted,
+              onChanged: widget.onChanged,
               style: inputStyle,
               // O cursor do navegador usa a cor do texto (`caret-color: auto`).
               cursorColor: colors.foreground,
@@ -247,6 +297,10 @@ class _AppTextFieldState extends State<AppTextField> {
             ),
           ),
         ),
+        if (widget.errorText != null) ...[
+          const SizedBox(height: 8),
+          AppFieldError(widget.errorText!),
+        ],
       ],
     );
   }

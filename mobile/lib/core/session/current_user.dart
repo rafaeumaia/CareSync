@@ -20,3 +20,6 @@ final currentDateProvider = Provider<DateTime>((ref) {
   final now = DateTime.now();
   return DateTime(now.year, now.month, now.day);
 });
+
+/// Relógio do app (data e hora atuais), sobrescrevível em testes.
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);

@@ -26,9 +26,9 @@ enum AppButtonVariant { primary, ghost, outline }
 ///   `input`); pressionado, como o ghost.
 ///
 /// [color] substitui o fundo do [AppButtonVariant.primary] (ex.:
-/// `bg-[#27AE60] hover:bg-[#27AE60]/90`); [icon] é um ícone lucide de 16px
-/// antes do texto, a [iconSpacing] dele. Com [expand] `false`, o botão tem
-/// a largura do conteúdo (padding `px-4`).
+/// `bg-[#27AE60] hover:bg-[#27AE60]/90`); [icon] é um ícone lucide antes do
+/// texto, de [iconSize] (padrão 16px) e a [iconSpacing] dele. Com [expand]
+/// `false`, o botão tem a largura do conteúdo (padding `px-4`).
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -39,6 +39,7 @@ class AppButton extends StatelessWidget {
     this.color,
     this.icon,
     this.iconSpacing = 8,
+    this.iconSize = 16,
     this.expand = true,
   });
 
@@ -49,6 +50,7 @@ class AppButton extends StatelessWidget {
   final Color? color;
   final String? icon;
   final double iconSpacing;
+  final double iconSize;
   final bool expand;
 
   @override
@@ -133,7 +135,7 @@ class AppButton extends StatelessWidget {
                     children: [
                       LucideIcon(
                         icon!,
-                        size: 16,
+                        size: iconSize,
                         color: DefaultTextStyle.of(context).style.color,
                       ),
                       SizedBox(width: iconSpacing),

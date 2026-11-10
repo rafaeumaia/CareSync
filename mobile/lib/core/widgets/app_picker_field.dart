@@ -19,6 +19,7 @@ class AppPickerField extends StatefulWidget {
     required this.icon,
     required this.onTap,
     this.value,
+    this.errorText,
   });
 
   final String label;
@@ -33,6 +34,9 @@ class AppPickerField extends StatefulWidget {
   /// Abre o seletor. O campo fica com a aparência de foco enquanto o
   /// `Future` não termina.
   final Future<void> Function() onTap;
+
+  /// Mensagem de erro (ver [AppTextField.errorText]).
+  final String? errorText;
 
   @override
   State<AppPickerField> createState() => _AppPickerFieldState();
@@ -58,7 +62,11 @@ class _AppPickerFieldState extends State<AppPickerField> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppFieldLabel(widget.label, onTap: _open),
+        AppFieldLabel(
+          widget.label,
+          onTap: _open,
+          hasError: widget.errorText != null,
+        ),
         const SizedBox(height: 8),
         Semantics(
           button: true,
@@ -70,6 +78,7 @@ class _AppPickerFieldState extends State<AppPickerField> {
             child: AppInputBox(
               variant: AppInputVariant.standard,
               focused: _active,
+              invalid: widget.errorText != null,
               child: Row(
                 children: [
                   Expanded(
@@ -87,6 +96,10 @@ class _AppPickerFieldState extends State<AppPickerField> {
             ),
           ),
         ),
+        if (widget.errorText != null) ...[
+          const SizedBox(height: 8),
+          AppFieldError(widget.errorText!),
+        ],
       ],
     );
   }

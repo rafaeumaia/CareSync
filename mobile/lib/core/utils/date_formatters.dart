@@ -38,3 +38,13 @@ String formatDdMmYyyy(DateTime date) =>
 /// Horário no formato `HH:mm` (valor de um `<input type="time">`).
 String formatHhMm(int hour, int minute) =>
     '${_twoDigits(hour)}:${_twoDigits(minute)}';
+
+const _shortWeekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+
+/// Dia da semana abreviado, como no eixo dos gráficos do protótipo
+/// ("Seg", "Ter"...).
+String formatShortWeekday(DateTime date) => _shortWeekdays[date.weekday - 1];
+
+/// Data no formato `dd/mm`.
+String formatDdMm(DateTime date) =>
+    '${_twoDigits(date.day)}/${_twoDigits(date.month)}';
