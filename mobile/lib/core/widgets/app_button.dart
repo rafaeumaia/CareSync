@@ -26,9 +26,13 @@ enum AppButtonVariant { primary, ghost, outline }
 ///   `input`); pressionado, como o ghost.
 ///
 /// [color] substitui o fundo do [AppButtonVariant.primary] (ex.:
-/// `bg-[#27AE60] hover:bg-[#27AE60]/90`); [icon] é um ícone lucide antes do
+/// `bg-[#27AE60] hover:bg-[#27AE60]/90`) e, no
+/// [AppButtonVariant.outline], a cor da borda e do texto, com fundo [color]
+/// e texto branco quando pressionado (ex.: `border-[#27AE60] text-[#27AE60]
+/// hover:bg-[#27AE60] hover:text-white`); [icon] é um ícone lucide antes do
 /// texto, de [iconSize] (padrão 16px) e a [iconSpacing] dele. Com [expand]
-/// `false`, o botão tem a largura do conteúdo (padding `px-4`).
+/// `false`, o botão tem a largura do conteúdo, com [horizontalPadding] de
+/// cada lado (padrão `px-4`; `px-3` no `size="sm"`).
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -41,6 +45,7 @@ class AppButton extends StatelessWidget {
     this.iconSpacing = 8,
     this.iconSize = 16,
     this.expand = true,
+    this.horizontalPadding = 16,
   });
 
   final String label;
@@ -52,43 +57,47 @@ class AppButton extends StatelessWidget {
   final double iconSpacing;
   final double iconSize;
   final bool expand;
+  final double horizontalPadding;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.careSyncColors;
     final isPrimary = variant == AppButtonVariant.primary;
+    final isOutline = variant == AppButtonVariant.outline;
+    final outlineColor = isOutline ? color : null;
 
     // Primary pressionado mantém `primary-foreground`; ghost pressionado usa
     // `accent-foreground`, que é #FFFFFF nos dois temas — mesmo valor de
     // `primary-foreground`.
     final pressedForeground = colors.primaryForeground;
-    final idleForeground =
-        isPrimary ? colors.primaryForeground : colors.foreground;
+    final idleForeground = isPrimary
+        ? colors.primaryForeground
+        : outlineColor ?? colors.foreground;
     final primaryBackground = color ?? colors.primary;
     final idleBackground = isPrimary ? primaryBackground : Colors.transparent;
     final pressedBackground = isPrimary
         ? primaryBackground.withValues(alpha: 0.9)
-        : colors.accent;
+        : outlineColor ?? colors.accent;
 
-    final isOutline = variant == AppButtonVariant.outline;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     // `--input` escuro: rgba(255, 255, 255, 0.1).
     const darkInput = Color(0x1AFFFFFF);
-    final outlineBackground =
-        isDark ? Colors.white.withValues(alpha: 0.03) : colors.background;
-    final outlineBorder = isDark ? darkInput : colors.border;
+    final outlineBackground = isDark
+        ? Colors.white.withValues(alpha: 0.03)
+        : colors.background;
+    final outlineBorder = outlineColor ?? (isDark ? darkInput : colors.border);
 
     bool isActive(Set<WidgetState> states) =>
         states.contains(WidgetState.pressed) ||
         states.contains(WidgetState.hovered);
 
     final textStyle = Theme.of(context).textTheme.labelLarge?.copyWith(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          height: 20 / 14,
-          letterSpacing: 0,
-          leadingDistribution: TextLeadingDistribution.even,
-        );
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 20 / 14,
+      letterSpacing: 0,
+      leadingDistribution: TextLeadingDistribution.even,
+    );
 
     return Opacity(
       opacity: onPressed == null ? 0.5 : 1,
@@ -98,8 +107,8 @@ class AppButton extends StatelessWidget {
         child: TextButton(
           onPressed: onPressed,
           style: ButtonStyle(
-            padding: const WidgetStatePropertyAll(
-              EdgeInsets.symmetric(horizontal: 16),
+            padding: WidgetStatePropertyAll(
+              EdgeInsets.symmetric(horizontal: horizontalPadding),
             ),
             shape: WidgetStatePropertyAll(
               RoundedRectangleBorder(
@@ -114,8 +123,8 @@ class AppButton extends StatelessWidget {
               (states) => isActive(states)
                   ? pressedBackground
                   : isOutline
-                      ? outlineBackground
-                      : idleBackground,
+                  ? outlineBackground
+                  : idleBackground,
             ),
             foregroundColor: WidgetStateProperty.resolveWith(
               (states) => isActive(states) ? pressedForeground : idleForeground,

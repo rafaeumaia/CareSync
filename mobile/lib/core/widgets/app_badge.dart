@@ -10,16 +10,18 @@ import 'lucide_icon.dart';
 ///
 /// [icon], opcional, é um ícone lucide de 12px (`[&>svg]:size-3`) antes do
 /// texto, a 8px dele (`gap-1` do badge + `mr-1` do ícone no protótipo).
+/// Sem [label], o badge mostra só o ícone (ex.: o check das refeições
+/// confirmadas em Alimentação).
 class AppBadge extends StatelessWidget {
   const AppBadge({
     super.key,
-    required this.label,
+    this.label,
     required this.backgroundColor,
     required this.foregroundColor,
     this.icon,
   });
 
-  final String label;
+  final String? label;
   final Color backgroundColor;
   final Color foregroundColor;
   final String? icon;
@@ -38,18 +40,19 @@ class AppBadge extends StatelessWidget {
         children: [
           if (icon != null) ...[
             LucideIcon(icon!, size: 12, color: foregroundColor),
-            const SizedBox(width: 8),
+            if (label != null) const SizedBox(width: 8),
           ],
-          Text(
-            label,
-            maxLines: 1,
-            style: AppTypography.inter(
-              size: 12,
-              lineHeight: 16,
-              weight: FontWeight.w500,
-              color: foregroundColor,
+          if (label != null)
+            Text(
+              label!,
+              maxLines: 1,
+              style: AppTypography.inter(
+                size: 12,
+                lineHeight: 16,
+                weight: FontWeight.w500,
+                color: foregroundColor,
+              ),
             ),
-          ),
         ],
       ),
     );

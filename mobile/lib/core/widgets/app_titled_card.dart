@@ -8,18 +8,19 @@ import 'lucide_icon.dart';
 /// Card com cabeçalho do protótipo (`Card` + `CardHeader` + `CardTitle
 /// className="flex items-center gap-2"` + `CardContent`): ícone lucide de
 /// 20px a 8px do título de 16px (`leading-none`), padding de 24px e 24px
-/// entre o cabeçalho e o [child] (`gap-6`).
+/// entre o cabeçalho e o [child] (`gap-6`). Sem [icon], o título fica
+/// sozinho (`CardTitle` sem classes).
 class AppTitledCard extends StatelessWidget {
   const AppTitledCard({
     super.key,
-    required this.icon,
-    required this.iconColor,
+    this.icon,
+    this.iconColor,
     required this.title,
     required this.child,
   });
 
-  final String icon;
-  final Color iconColor;
+  final String? icon;
+  final Color? iconColor;
   final String title;
   final Widget child;
 
@@ -34,8 +35,10 @@ class AppTitledCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              LucideIcon(icon, size: 20, color: iconColor),
-              const SizedBox(width: 8),
+              if (icon != null) ...[
+                LucideIcon(icon!, size: 20, color: iconColor),
+                const SizedBox(width: 8),
+              ],
               Flexible(
                 child: Text(
                   title,
