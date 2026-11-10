@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_radius.dart';
@@ -177,6 +178,9 @@ class AppTextField extends StatefulWidget {
     this.onSubmitted,
     this.onChanged,
     this.errorText,
+    this.suffix,
+    this.autofillHints,
+    this.inputFormatters,
   });
 
   final String label;
@@ -196,6 +200,15 @@ class AppTextField extends StatefulWidget {
   /// Mensagem de erro, 8px abaixo do campo (`FormMessage`); também deixa
   /// label e borda em `destructive`.
   final String? errorText;
+
+  /// Widget à direita do texto, dentro do campo (ex.: mostrar/ocultar
+  /// senha), a 8px dele.
+  final Widget? suffix;
+
+  /// Dicas para o preenchimento automático do sistema (ver
+  /// [AutofillHints]); só têm efeito dentro de um [AutofillGroup].
+  final Iterable<String>? autofillHints;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -231,6 +244,18 @@ class _AppTextFieldState extends State<AppTextField> {
 
   void _onFocusChange() => setState(() {});
 
+  Widget _withSuffix(Widget field) {
+    final suffix = widget.suffix;
+    if (suffix == null) return field;
+    return Row(
+      children: [
+        Expanded(child: field),
+        const SizedBox(width: 8),
+        suffix,
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.careSyncColors;
@@ -257,42 +282,46 @@ class _AppTextFieldState extends State<AppTextField> {
               selectionColor: colors.primary,
               selectionHandleColor: colors.primary,
             ),
-            child: TextField(
-              controller: widget.controller,
-              focusNode: _focusNode,
-              keyboardType: multiline
-                  ? TextInputType.multiline
-                  : widget.keyboardType,
-              textInputAction: widget.textInputAction,
-              textCapitalization: widget.textCapitalization,
-              minLines: multiline ? 1 : null,
-              maxLines: multiline ? null : 1,
-              obscureText: widget.obscureText,
-              obscuringCharacter: '•',
-              autocorrect: widget.autocorrect,
-              enableSuggestions: widget.enableSuggestions,
-              onSubmitted: widget.onSubmitted,
-              onChanged: widget.onChanged,
-              style: inputStyle,
-              // O cursor do navegador usa a cor do texto (`caret-color: auto`).
-              cursorColor: colors.foreground,
-              // Fundo, borda e anel de foco são desenhados por
-              // [AppInputBox]; todas as bordas/preenchimento do
-              // `inputDecorationTheme` global são desligados aqui (o
-              // `InputDecoration.collapsed` ainda herdaria o `focusedBorder`
-              // do tema).
-              decoration: InputDecoration(
-                isCollapsed: true,
-                filled: false,
-                contentPadding: EdgeInsets.zero,
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                hintText: widget.placeholder,
-                hintStyle: inputStyle.copyWith(color: colors.mutedForeground),
+            child: _withSuffix(
+              TextField(
+                controller: widget.controller,
+                autofillHints: widget.autofillHints,
+                inputFormatters: widget.inputFormatters,
+                focusNode: _focusNode,
+                keyboardType: multiline
+                    ? TextInputType.multiline
+                    : widget.keyboardType,
+                textInputAction: widget.textInputAction,
+                textCapitalization: widget.textCapitalization,
+                minLines: multiline ? 1 : null,
+                maxLines: multiline ? null : 1,
+                obscureText: widget.obscureText,
+                obscuringCharacter: '•',
+                autocorrect: widget.autocorrect,
+                enableSuggestions: widget.enableSuggestions,
+                onSubmitted: widget.onSubmitted,
+                onChanged: widget.onChanged,
+                style: inputStyle,
+                // O cursor do navegador usa a cor do texto (`caret-color: auto`).
+                cursorColor: colors.foreground,
+                // Fundo, borda e anel de foco são desenhados por
+                // [AppInputBox]; todas as bordas/preenchimento do
+                // `inputDecorationTheme` global são desligados aqui (o
+                // `InputDecoration.collapsed` ainda herdaria o `focusedBorder`
+                // do tema).
+                decoration: InputDecoration(
+                  isCollapsed: true,
+                  filled: false,
+                  contentPadding: EdgeInsets.zero,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  hintText: widget.placeholder,
+                  hintStyle: inputStyle.copyWith(color: colors.mutedForeground),
+                ),
               ),
             ),
           ),

@@ -33,6 +33,9 @@ enum AppButtonVariant { primary, ghost, outline }
 /// texto, de [iconSize] (padrão 16px) e a [iconSpacing] dele. Com [expand]
 /// `false`, o botão tem a largura do conteúdo, com [horizontalPadding] de
 /// cada lado (padrão `px-4`; `px-3` no `size="sm"`).
+///
+/// Com [loading], o botão mostra um indicador circular de 16px antes do
+/// texto e ignora toques, mantendo a opacidade normal.
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -46,6 +49,7 @@ class AppButton extends StatelessWidget {
     this.iconSize = 16,
     this.expand = true,
     this.horizontalPadding = 16,
+    this.loading = false,
   });
 
   final String label;
@@ -58,6 +62,7 @@ class AppButton extends StatelessWidget {
   final double iconSize;
   final bool expand;
   final double horizontalPadding;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -99,13 +104,15 @@ class AppButton extends StatelessWidget {
       leadingDistribution: TextLeadingDistribution.even,
     );
 
+    final effectiveOnPressed = loading ? null : onPressed;
+
     return Opacity(
       opacity: onPressed == null ? 0.5 : 1,
       child: SizedBox(
         width: expand ? double.infinity : null,
         height: height,
         child: TextButton(
-          onPressed: onPressed,
+          onPressed: effectiveOnPressed,
           style: ButtonStyle(
             padding: WidgetStatePropertyAll(
               EdgeInsets.symmetric(horizontal: horizontalPadding),
@@ -135,7 +142,27 @@ class AppButton extends StatelessWidget {
             minimumSize: const WidgetStatePropertyAll(Size.zero),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
-          child: icon == null
+          child: loading
+              ? Builder(
+                  builder: (context) {
+                    final color = DefaultTextStyle.of(context).style.color;
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox.square(
+                          dimension: iconSize,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: color,
+                          ),
+                        ),
+                        SizedBox(width: iconSpacing),
+                        Flexible(child: Text(label)),
+                      ],
+                    );
+                  },
+                )
+              : icon == null
               ? Text(label)
               : Builder(
                   // O ícone herda a cor do texto do botão (`currentColor`).

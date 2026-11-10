@@ -21,22 +21,28 @@ import 'lucide_icon.dart';
 ///   centralizado abaixo de 640px e alinhado à esquerda acima
 ///   (`text-center sm:text-left`), 16px acima do conteúdo (`gap-4`);
 /// - botão de fechar (X de 16px, opacidade 70%) a 16px do canto.
+///
+/// Sem [title], o conteúdo de [builder] ocupa todo o diálogo (ex.: um
+/// `DialogHeader` com ícone e título próprios). Com [barrierDismissible]
+/// `false`, tocar fora não fecha (ex.: `<Dialog open>` sem
+/// `onOpenChange`); o X e o voltar do sistema chamam `maybePop`, que o
+/// conteúdo pode interceptar com um [PopScope].
 Future<T?> showAppDialog<T>({
   required BuildContext context,
-  required String title,
   required WidgetBuilder builder,
+  String? title,
+  bool barrierDismissible = true,
 }) {
   return showGeneralDialog<T>(
     context: context,
-    barrierDismissible: true,
+    barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: Colors.black.withValues(alpha: 0.5),
     transitionDuration: const Duration(milliseconds: 200),
     pageBuilder: (dialogContext, _, _) =>
         _AppDialog(title: title, builder: builder),
     transitionBuilder: (context, animation, _, child) {
-      final curved =
-          CurvedAnimation(parent: animation, curve: Curves.easeOut);
+      final curved = CurvedAnimation(parent: animation, curve: Curves.easeOut);
       return FadeTransition(
         opacity: curved,
         child: ScaleTransition(
@@ -51,7 +57,7 @@ Future<T?> showAppDialog<T>({
 class _AppDialog extends StatelessWidget {
   const _AppDialog({required this.title, required this.builder});
 
-  final String title;
+  final String? title;
   final WidgetBuilder builder;
 
   @override
@@ -61,7 +67,8 @@ class _AppDialog extends StatelessWidget {
     final screenWidth = media.size.width;
     final maxWidth = screenWidth >= 640 ? 512.0 : 448.0;
     final isSmall = screenWidth < 640;
-    final availableHeight = media.size.height -
+    final availableHeight =
+        media.size.height -
         media.viewInsets.bottom -
         media.padding.top -
         media.padding.bottom;
@@ -95,18 +102,21 @@ class _AppDialog extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          title,
-                          textAlign:
-                              isSmall ? TextAlign.center : TextAlign.start,
-                          style: AppTypography.inter(
-                            size: 18,
-                            lineHeight: 18,
-                            weight: FontWeight.w600,
-                            color: colors.foreground,
+                        if (title != null) ...[
+                          Text(
+                            title!,
+                            textAlign: isSmall
+                                ? TextAlign.center
+                                : TextAlign.start,
+                            style: AppTypography.inter(
+                              size: 18,
+                              lineHeight: 18,
+                              weight: FontWeight.w600,
+                              color: colors.foreground,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
+                        ],
                         Builder(builder: builder),
                       ],
                     ),
